@@ -1,15 +1,49 @@
 Private Sub cmdRunPayouts_Click()
-    On Error GoTo ErrorHandler
-    
-    ' Name of the report to open
+ On Error GoTo Errorhandler
+
     Dim reportName As String
-    reportName = "4_SA PAYOUTS   (15A_VC_QSANE)" ' Replace with the actual name of your report
+    Dim docketDate As Date
+    Dim qdf As DAO.QueryDef
+    Dim sqlText As String
+
+    reportName = "4_SA PAYOUTS   (15A_VC_QSANE)"
+    docketDate = Me.EnterDocketDate.Value
+
+    ' *** Rewrite the SQL of the query ***
+    Set qdf = CurrentDb.QueryDefs("15A_VC_QSANE")
+
     
-    ' Open the report in Print Preview mode
+    sqlText = "SELECT [4_FY94CLMS].CLAIMNO, [4_FY94CLMS].V_SORT, [4_FY94CLMS].FY, [4_FY94CLMS].REMARKS, " & _
+              "[4_FY94CLMS].CLMTYPE, [4_FY94CLMS].FUND, [4_FY94CLMS].SUBACTIV, [4_FY94CLMS].ORDERTYPE, " & _
+              "[4_FY94CLMS].ORDER, [4_FY94CLMS].TOTALAMT, [4_FY94CLMS].OBJ1, [4_FY94CLMS].AMT1, " & _
+              "[4_FY94CLMS].WARRNO, [4_FY94CLMS].WARRDATE, [4_FY94CLMS].DIST, [4_FY94CLMS].COUNTY, " & _
+              "[4_FY94CLMS].VICTPAYEE, [4_FY94CLMS].VICTIM, [4_FY94CLMS].TYPE, [OSFSERVICEPROVIDERS].PAYEE, " & _
+              "[OSFSERVICEPROVIDERS].PAY_ADD, [OSFSERVICEPROVIDERS].PAY_CITY, [OSFSERVICEPROVIDERS].PAY_STATE, " & _
+              "[OSFSERVICEPROVIDERS].PAY_ZIP, [4_FY94CLMS].ADMIN_APR, [4_FY94CLMS].TAXID, " & _
+              "[OSFSERVICEPROVIDERS].SP_TAX_ID, [4_FY94CLMS].ACCT, [4_FY94CLMS].BATCH, [4_FY94CLMS].REF, " & _
+              "[4_FY94CLMS].INVOICE, [OSFSERVICEPROVIDERS].VICTIMPAYEE, [OSFSERVICEPROVIDERS].OSFVendorID, " & _
+              "[OSFSERVICEPROVIDERS].PROVTYPE, [OSFSERVICEPROVIDERS].OSFVendorLoc, " & _
+              "[4_FY94CLMS].ENTRYDATE, [4_FY94CLMS].ENTRYDATE, [4_FY94CLMS].CLMDATE " & _
+              "FROM 4_FY94CLMS LEFT JOIN [OSFSERVICEPROVIDERS] ON [4_FY94CLMS].TAXID = [OSFSERVICEPROVIDERS].SP_TAX_ID " & _
+              "WHERE ((([4_FY94CLMS].FUND)='240') AND (([4_FY94CLMS].VICTIM)='SAEF') " & _
+              "AND (([4_FY94CLMS].ENTRYDATE)=#" & Format(docketDate, "yyyy-mm-dd") & "#) " & _
+              "AND (([4_FY94CLMS].CLMDATE)=#" & Format(docketDate, "yyyy-mm-dd") & "#)) " & _
+              "ORDER BY [4_FY94CLMS].CLAIMNO, [4_FY94CLMS].VICTPAYEE DESC , [4_FY94CLMS].CLMDATE;"
+
+    qdf.sql = sqlText   ' <-- saves the new version of the query
+
+    ' Run the report (which now uses the updated query)
     DoCmd.OpenReport reportName, acViewPreview
-    
-    MsgBox "Report '" & reportName & "' opened successfully in Print Preview.", vbInformation, "Success"
+
+    MsgBox "Report '" & reportName & "' opened successfully in Print Preview.", vbInformation
     Exit Sub
+
+Errorhandler:
+    MsgBox "An error occurred while opening the report: " & Err.Description, vbExclamation
+
+
+End Sub
+
 
 ErrorHandler:
     MsgBox "An error occurred while opening the report: " & Err.Description, vbExclamation, "Error"
