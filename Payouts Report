@@ -1,0 +1,16 @@
+Private Sub cmdRunPayouts_Click()
+    On Error GoTo ErrorHandler
+    
+    ' Name of the report to open
+    Dim reportName As String
+    reportName = "4_SA PAYOUTS   (15A_VC_QSANE)" ' Replace with the actual name of your report
+    
+    ' Open the report in Print Preview mode
+    DoCmd.OpenReport reportName, acViewPreview
+    
+    MsgBox "Report '" & reportName & "' opened successfully in Print Preview.", vbInformation, "Success"
+    Exit Sub
+
+ErrorHandler:
+    MsgBox "An error occurred while opening the report: " & Err.Description, vbExclamation, "Error"
+End Sub
